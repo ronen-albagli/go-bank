@@ -1,12 +1,12 @@
 package ports
 
-type Asset struct {
-	assetType string
-	amount    int64
-	reason    string
-	name      string
+import (
+	types "bank/app/types"
+)
+
+type AssetInput struct {
 }
 
 type LedgerGateway interface {
-	save(asset Asset)
+	Store(asset types.NewAssetInput) error
 }

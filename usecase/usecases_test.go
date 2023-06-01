@@ -1,35 +1,42 @@
 package usecase
 
 import (
-	"bank/adapter"
+	adapter "bank/app/adapter"
 	"testing"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func TestAddAssets(t *testing.T) {
-
-	var input = &Input1{}
-
-	config := &Config{
-		mongo: &adapter.LedgerMongoGateway{},
-	}
-
-	input.amount = 10
-	input.assetType = "Shekel"
-	input.reason = "Salary"
-	input.eventName = "zazi"
-
-	usecase := &AddCreditUseCaseStruct{
-		config,
-	}
-
-	usecase.c.do(*input)
+type AddLedgerEvent struct {
+	ledgerCollection *mongo.Collection
 }
 
-// TestHelloEmpty calls greetings.Hello with an empty string,
-// checking for an error.
+func TestAddAssets(t *testing.T) {
+	var input = &AssetInputTest{}
+
+	configuration := &Config{
+		LedgerCollection: &adapter.LedgerMongoInMemoryGateway{},
+	}
+
+	input.EventName = "zazi"
+	input.Amount = 10
+	input.AssetType = "Shekel"
+	input.Reason = "Salary"
+
+	usecase := &AddCreditUseCaseStruct{
+		configuration,
+	}
+
+	err := usecase.Do(*input)
+
+	if err != nil {
+		t.Error("Use case failed, Error: ", err)
+	}
+
+	t.Log("Test pass")
+
+}
+
 func TestHelloEmpty(t *testing.T) {
-	// msg, err := Hello("")
-	// if msg != "" || err == nil {
-	// 	t.Fatalf(`Hello("") = %q, %v, want "", error`, msg, err)
-	// }
+
 }

@@ -17,6 +17,8 @@ type Mongo interface{}
 type SetConf interface{}
 type GetMongoClient interface{}
 
+// type GetLedgerGateway interface{}
+
 type Config struct {
 	mongo   *mongo.Client
 	envList *Conf
@@ -24,6 +26,26 @@ type Config struct {
 
 type Conf struct {
 	MongoUri string `yaml:"mongoUri"`
+}
+
+type GetLedgerGateway struct {
+	LedgerCollecton *mongo.Collection
+}
+
+func (c *Config) GetLedgerGateway() *mongo.Collection {
+	client, err := c.GetMongoClient()
+
+	if err != nil {
+		return nil
+	}
+
+	ledgerGateway := client.Database("Mongo").Collection("ledger")
+
+	if err != nil {
+		return nil
+	}
+
+	return ledgerGateway
 }
 
 func (c *Config) GetMongoClient() (*mongo.Client, error) {
