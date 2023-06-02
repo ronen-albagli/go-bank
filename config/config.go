@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	adapter "bank/app/adapter"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -30,6 +32,23 @@ type Conf struct {
 
 type GetLedgerGateway struct {
 	LedgerCollecton *mongo.Collection
+}
+
+func (c *Config) GetMongoInMemory() *adapter.LedgerMongoInMemoryGateway {
+	// client, err := c.GetMongoClient()
+
+	mongoMemory := &adapter.LedgerMongoInMemoryGateway{}
+	// if err != nil {
+	// 	return nil
+	// }
+
+	// ledgerGateway := client.Database("Mongo").Collection("ledger")
+
+	// if err != nil {
+	// 	return nil
+	// }
+
+	return mongoMemory
 }
 
 func (c *Config) GetLedgerGateway() *mongo.Collection {

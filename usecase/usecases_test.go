@@ -1,7 +1,8 @@
 package usecase
 
 import (
-	adapter "bank/app/adapter"
+	"bank/app/adapter"
+	"bank/config"
 	"testing"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,8 +15,15 @@ type AddLedgerEvent struct {
 func TestAddAssets(t *testing.T) {
 	var input = &AssetInputTest{}
 
-	configuration := &Config{
-		LedgerCollection: &adapter.LedgerMongoInMemoryGateway{},
+	conf := new(config.Config)
+	// conf.SetConf()
+
+	mongoColl := conf.GetMongoInMemory()
+
+	configuration := Config{
+		LedgerCollection: &adapter.LedgerMongoInMemoryGateway{
+			Collection: *mongoColl,
+		},
 	}
 
 	input.EventName = "zazi"
@@ -24,7 +32,7 @@ func TestAddAssets(t *testing.T) {
 	input.Reason = "Salary"
 
 	usecase := &AddCreditUseCaseStruct{
-		configuration,
+		Config: configuration,
 	}
 
 	transactionId, err := usecase.Do(*input)

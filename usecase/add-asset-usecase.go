@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"bank/ports"
 	"fmt"
 )
 
@@ -13,23 +12,9 @@ type AssetInputTest struct {
 	AccountId int64
 }
 
-type IAddCreditUseCase interface {
-	Do(asset AssetInputTest) (string, error)
-}
+func (addUseCase AddCreditUseCaseStruct) Do(asset AssetInputTest) (string, error) {
+	c := addUseCase.Config
 
-type IConfig interface {
-	Config
-}
-
-type Config struct {
-	LedgerCollection ports.LedgerGateway
-}
-
-type AddCreditUseCaseStruct struct {
-	IAddCreditUseCase
-}
-
-func (c *Config) Do(asset AssetInputTest) (string, error) {
 	ledger := c.LedgerCollection.InitLedger(asset.AccountId)
 
 	transactionId, _ := ledger.AddQuota(asset.AssetType, asset.Amount, asset.Reason)
