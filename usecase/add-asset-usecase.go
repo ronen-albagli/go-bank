@@ -1,11 +1,8 @@
 package usecase
 
 import (
-	types "bank/app/types"
-	adapter "bank/ports"
+	"bank/ports"
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
 type AssetInputTest struct {
@@ -25,7 +22,7 @@ type IConfig interface {
 }
 
 type Config struct {
-	LedgerCollection adapter.LedgerGateway
+	LedgerCollection ports.LedgerGateway
 }
 
 type AddCreditUseCaseStruct struct {
@@ -33,22 +30,11 @@ type AddCreditUseCaseStruct struct {
 }
 
 func (c *Config) Do(asset AssetInputTest) (string, error) {
+	ledger := c.LedgerCollection.InitLedger(asset.AccountId)
 
-	ledgerEvents := c.LedgerCollection.InitLedger(1)
+	transactionId, _ := ledger.AddQuota(asset.AssetType, asset.Amount, asset.Reason)
 
-	fmt.Println(ledgerEvents)
-
-	transactionId := uuid.New().String()
-
-	a := types.NewAssetInput{}
-	a.AccountId = asset.AccountId
-	a.Amount = asset.Amount
-	a.AssetType = asset.AssetType
-	a.Reason = asset.Reason
-	a.EventName = "GRANT"
-	a.TransactionId = transactionId
-
-	err := c.LedgerCollection.Store(a)
+	err := c.LedgerCollection.Store(ledger.GetEvents())
 
 	if err != nil {
 		return "", err

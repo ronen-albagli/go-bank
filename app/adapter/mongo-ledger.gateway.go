@@ -4,60 +4,49 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
+	entities "bank/app/entities"
 	types "bank/app/types"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// type LedgerEvent struct {
-// 	AccountId     int64
-// 	Amount        int64
-// 	AssetType     string
-// 	EventName     string
-// 	Reason        string
-// 	TransactionId string
-// 	Version       int64
-// }
-
 type LedgerMongoGateway struct {
 	mongo.Collection
 }
 
-func (m *LedgerMongoGateway) Store(input types.NewAssetInput) error {
+func (m *LedgerMongoGateway) Store(LedgerEvents []types.LedgerEvent) error {
 	ctx := context.Background()
 
-	fmt.Println("Saved in DB", input)
+	for _, LedgerEvent := range LedgerEvents {
+		data, err := m.InsertOne(
+			ctx,
+			bson.M{
+				"accountId":     LedgerEvent.AccountId,
+				"amount":        LedgerEvent.Amount,
+				"eventName":     LedgerEvent.EventName,
+				"timestamp":     LedgerEvent.Timestamp,
+				"assetType":     LedgerEvent.AssetType,
+				"reason":        LedgerEvent.Reason,
+				"transactionId": LedgerEvent.TransactionId,
+				"version":       LedgerEvent.Version,
+			})
 
-	data, err := m.InsertOne(
-		ctx,
-		bson.M{
-			"accountId":     input.AccountId,
-			"amount":        input.Amount,
-			"eventType":     "GRANT",
-			"event":         input.EventName,
-			"timestamp":     time.Now(),
-			"assetType":     input.AssetType,
-			"reason":        input.Reason,
-			"transactionId": input.TransactionId,
-			"version":       input.Version,
-		})
+		if err != nil {
+			return errors.New("failed to insert to ledger")
+		}
 
-	if err != nil {
-		return errors.New("failed to insert to ledger")
+		fmt.Println(data)
 	}
 
-	fmt.Println(data)
 	return nil
 }
 
-func (m *LedgerMongoGateway) InitLedger(accountId int64) types.LedgerEvent {
+func (m *LedgerMongoGateway) InitLedger(accountId int64) *entities.LedgerEntity {
 	var cur *mongo.Cursor
 	var err error
 	ctx := context.Background()
-	var doc types.LedgerEvent
 	var ledgerEvents []types.LedgerEvent
 
 	filter := bson.D{{Key: "accountId", Value: accountId}}
@@ -66,15 +55,19 @@ func (m *LedgerMongoGateway) InitLedger(accountId int64) types.LedgerEvent {
 		panic(err)
 	}
 
-	cur.Decode(&doc)
-
 	defer cur.Close(ctx)
 
-	for cur.Next(ctx) {
-		cur.Decode(&doc)
-		ledgerEvents = append(ledgerEvents, doc)
+	if err = cur.All(ctx, &ledgerEvents); err != nil {
+		panic(err)
 	}
 
-	return doc
+	ledger := &entities.LedgerEntity{
+		AccountId: accountId,
+		Version:   0,
+	}
+
+	ledger.ApplyEvents(ledgerEvents)
+
+	return ledger
 
 }

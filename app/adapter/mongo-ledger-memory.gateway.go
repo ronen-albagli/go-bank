@@ -11,7 +11,7 @@ type LedgerMongoInMemoryGateway struct {
 	ports.LedgerGateway
 }
 
-func (m *LedgerMongoInMemoryGateway) Store(asset types.NewAssetInput) error {
+func (m *LedgerMongoInMemoryGateway) Store(asset []types.LedgerEvent) error {
 	fmt.Println("Saved in memory")
 
 	gateway.Save()
