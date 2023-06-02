@@ -8,8 +8,21 @@ type INewAssetInput interface {
 }
 
 type NewAssetInput struct {
-	EventName string
-	Amount    int64
-	AssetType string
-	Reason    string
+	AccountId     int64
+	EventName     string
+	Amount        int64
+	AssetType     string
+	Reason        string
+	TransactionId string
+	Version       int64
+}
+
+type LedgerEvent struct {
+	AccountId     int64
+	Amount        int64
+	AssetType     string
+	EventName     string
+	Reason        string
+	TransactionId string
+	Version       int64
 }

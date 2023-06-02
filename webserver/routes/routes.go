@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"net/http"
 
 	adapter "bank/app/adapter"
@@ -14,6 +15,10 @@ type TransactionInput struct {
 	AccountId int64
 	AssetType string
 	Amount    int64
+}
+
+type NewAssetResponse struct {
+	TransactionId string `json:"transactionId"`
 }
 
 func CreateServerRoutes(app *gin.Engine) {
@@ -45,17 +50,28 @@ func CreateServerRoutes(app *gin.Engine) {
 		input.Amount = parsedInput.Amount
 		input.AssetType = parsedInput.AssetType
 		input.Reason = "Salary"
+		input.AccountId = parsedInput.AccountId
 
 		usecase := &usecase.AddCreditUseCaseStruct{
-			&configuration,
+			IAddCreditUseCase: &configuration,
 		}
 
-		err := usecase.Do(*input)
+		transactionId, err := usecase.Do(*input)
 
 		if err != nil {
 			panic("Failed to execute use case")
 		}
 
-		c.JSON(http.StatusCreated, parsedInput)
+		var response = &NewAssetResponse{
+			TransactionId: transactionId,
+		}
+
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			// return nil, err
+			c.JSON(http.StatusBadRequest, err)
+		}
+
+		c.JSON(http.StatusCreated, string(jsonResponse))
 	})
 }

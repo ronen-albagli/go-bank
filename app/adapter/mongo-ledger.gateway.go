@@ -12,12 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type LedgerEvent struct {
-	amount    int64
-	assetType string
-	eventName string
-	reason    string
-}
+// type LedgerEvent struct {
+// 	AccountId     int64
+// 	Amount        int64
+// 	AssetType     string
+// 	EventName     string
+// 	Reason        string
+// 	TransactionId string
+// 	Version       int64
+// }
 
 type LedgerMongoGateway struct {
 	mongo.Collection
@@ -31,12 +34,15 @@ func (m *LedgerMongoGateway) Store(input types.NewAssetInput) error {
 	data, err := m.InsertOne(
 		ctx,
 		bson.M{
-			"amount":    input.Amount,
-			"eventType": "GRANT",
-			"event":     input.EventName,
-			"timestamp": time.Now(),
-			"assetType": input.AssetType,
-			"reason":    input.Reason,
+			"accountId":     input.AccountId,
+			"amount":        input.Amount,
+			"eventType":     "GRANT",
+			"event":         input.EventName,
+			"timestamp":     time.Now(),
+			"assetType":     input.AssetType,
+			"reason":        input.Reason,
+			"transactionId": input.TransactionId,
+			"version":       input.Version,
 		})
 
 	if err != nil {
@@ -45,4 +51,30 @@ func (m *LedgerMongoGateway) Store(input types.NewAssetInput) error {
 
 	fmt.Println(data)
 	return nil
+}
+
+func (m *LedgerMongoGateway) InitLedger(accountId int64) types.LedgerEvent {
+	var cur *mongo.Cursor
+	var err error
+	ctx := context.Background()
+	var doc types.LedgerEvent
+	var ledgerEvents []types.LedgerEvent
+
+	filter := bson.D{{Key: "accountId", Value: accountId}}
+
+	if cur, err = m.Find(ctx, filter); err != nil {
+		panic(err)
+	}
+
+	cur.Decode(&doc)
+
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		cur.Decode(&doc)
+		ledgerEvents = append(ledgerEvents, doc)
+	}
+
+	return doc
+
 }

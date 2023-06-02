@@ -4,6 +4,8 @@ import (
 	types "bank/app/types"
 	adapter "bank/ports"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type AssetInputTest struct {
@@ -11,10 +13,11 @@ type AssetInputTest struct {
 	Amount    int64
 	AssetType string
 	Reason    string
+	AccountId int64
 }
 
 type IAddCreditUseCase interface {
-	Do(asset AssetInputTest) error
+	Do(asset AssetInputTest) (string, error)
 }
 
 type IConfig interface {
@@ -29,16 +32,29 @@ type AddCreditUseCaseStruct struct {
 	IAddCreditUseCase
 }
 
-func (c *Config) Do(asset AssetInputTest) error {
+func (c *Config) Do(asset AssetInputTest) (string, error) {
+
+	ledgerEvents := c.LedgerCollection.InitLedger(1)
+
+	fmt.Println(ledgerEvents)
+
+	transactionId := uuid.New().String()
+
 	a := types.NewAssetInput{}
+	a.AccountId = asset.AccountId
 	a.Amount = asset.Amount
 	a.AssetType = asset.AssetType
 	a.Reason = asset.Reason
 	a.EventName = "GRANT"
+	a.TransactionId = transactionId
 
-	c.LedgerCollection.Store(a)
+	err := c.LedgerCollection.Store(a)
+
+	if err != nil {
+		return "", err
+	}
 
 	fmt.Println(asset)
 
-	return nil
+	return transactionId, nil
 }

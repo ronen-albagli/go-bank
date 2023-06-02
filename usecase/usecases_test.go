@@ -27,13 +27,15 @@ func TestAddAssets(t *testing.T) {
 		configuration,
 	}
 
-	err := usecase.Do(*input)
+	transactionId, err := usecase.Do(*input)
 
 	if err != nil {
 		t.Error("Use case failed, Error: ", err)
 	}
 
-	t.Log("Test pass")
+	if transactionId != "" {
+		t.Log("Test pass")
+	}
 
 }
 
