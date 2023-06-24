@@ -19,6 +19,7 @@
             "program": "${workspaceFolder}",
             "env": {},
             "args": [
+                "air",
                 "-c",
                 ".air.toml"
             ],

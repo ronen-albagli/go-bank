@@ -8,6 +8,10 @@ import (
 
 	adapter "bank/app/adapter"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sqs"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -27,12 +31,18 @@ type Config struct {
 }
 
 type Conf struct {
-	MongoUri string `yaml:"mongoUri"`
+	MongoUri  string `yaml:"mongoUri"`
+	AwsAccess string `yaml:"awsAccessKey"`
+	AwsSecret string `yaml:"awsSecretKey"`
 }
 
 type GetLedgerGateway struct {
 	LedgerCollecton *mongo.Collection
 }
+
+// type getAWSSqsClient struct {
+// 	*sqs.ReceiveMessageOutput
+// }
 
 func (c *Config) GetMongoInMemory() *adapter.LedgerMongoInMemoryGateway {
 	// client, err := c.GetMongoClient()
@@ -67,8 +77,50 @@ func (c *Config) GetLedgerGateway() *mongo.Collection {
 	return ledgerGateway
 }
 
+func (c *Config) GetAWSSqsClient() (*sqs.SQS, error) {
+	awsAccess := c.envList.AwsAccess
+	awsSecret := c.envList.AwsSecret
+
+	sess, err := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(awsAccess, awsSecret, ""),
+		Region:      aws.String("us-east-1"), // Replace with your desired region
+	})
+
+	if err != nil {
+		fmt.Println("Failed to create session:", err)
+		return nil, err
+	}
+
+	// Create an SQS service client
+	svc := sqs.New(sess)
+
+	// Specify the URL of the queue to consume messages from
+	return svc, nil
+}
+
+// func (c *Config) GetInvoiceQueueGateway() (*sqs.ReceiveMessageOutput, error) {
+// 	client, err := c.getAWSSqsClient()
+
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	params := &sqs.ReceiveMessageInput{
+// 		QueueUrl:            aws.String("https://sqs.us-east-1.amazonaws.com/020761065253/invoice_completed.fifo"),
+// 		MaxNumberOfMessages: aws.Int64(1), // Maximum number of messages to retrieve
+// 		WaitTimeSeconds:     aws.Int64(2), // Long polling wait time (in seconds)
+// 	}
+
+// 	return client,
+
+// params := client.R{
+// 	QueueUrl:            aws.String(queueURL),
+// 	MaxNumberOfMessages: aws.Int64(10), // Maximum number of messages to retrieve
+// 	WaitTimeSeconds:     aws.Int64(20), // Long polling wait time (in seconds)
+// }
+// }
+
 func (c *Config) GetMongoClient() (*mongo.Client, error) {
-	println(c.getMongoURI())
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(900)*time.Millisecond)
 	defer cancel()
 

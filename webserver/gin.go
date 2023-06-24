@@ -4,6 +4,7 @@ import (
 
 	// "net/http"
 
+	consumers "bank/webserver/consumers"
 	router "bank/webserver/routes"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ func CreateWebServer() *gin.Engine {
 	app := gin.Default()
 
 	router.CreateServerRoutes(app)
+	consumers.InvoiceConsumer()
 
 	return app
 }
