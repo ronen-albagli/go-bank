@@ -8,6 +8,8 @@ import (
 
 	adapter "bank/app/adapter"
 
+	"github.com/joho/godotenv"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -15,7 +17,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"gopkg.in/yaml.v2"
 )
 
 type Mongo interface{}
@@ -26,8 +27,8 @@ type GetMongoClient interface{}
 // type GetLedgerGateway interface{}
 
 type Config struct {
-	mongo   *mongo.Client
-	envList *Conf
+	mongo *mongo.Client
+	// envList *Conf
 }
 
 type Conf struct {
@@ -78,8 +79,8 @@ func (c *Config) GetLedgerGateway() *mongo.Collection {
 }
 
 func (c *Config) GetAWSSqsClient() (*sqs.SQS, error) {
-	awsAccess := c.envList.AwsAccess
-	awsSecret := c.envList.AwsSecret
+	awsAccess := os.Getenv("AWS_ACCESS_KEY")
+	awsSecret := os.Getenv("AWS_SECRET_KEY")
 
 	sess, err := session.NewSession(&aws.Config{
 		Credentials: credentials.NewStaticCredentials(awsAccess, awsSecret, ""),
@@ -141,25 +142,14 @@ func (c *Config) GetMongoClient() (*mongo.Client, error) {
 }
 
 func (c *Config) getMongoURI() string {
-	return c.envList.MongoUri
+	return os.Getenv("MONGO_CON_STR")
 }
 
 func (c *Config) SetConf() {
-	if c.envList == nil {
-		file, err := os.Open("config.yaml")
-		if err != nil {
-
-			panic(err)
-		}
-		defer file.Close()
-		cfg := &Conf{}
-		yd := yaml.NewDecoder(file)
-		err = yd.Decode(cfg)
-
-		if err != nil {
-			panic(err)
-		}
-
-		c.envList = cfg
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file")
 	}
+
+	// c.envList = cfg
 }
