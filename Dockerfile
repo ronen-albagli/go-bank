@@ -7,7 +7,7 @@ EXPOSE 8002
 
 ENV GOFLAGS="-ldflags=-s -w"
 
-RUN CGO_ENABLED=0 GOOS=linux -buildvcs=false go build -o bank .
+RUN CGO_ENABLED=0 GOOS=linux go build -o bank .
 
 FROM alpine
 COPY --from=build /app/bank /
