@@ -9,7 +9,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -o bank .
 
 FROM alpine
 COPY --from=build /app/bank /
-COPY .env /
 
 
 
