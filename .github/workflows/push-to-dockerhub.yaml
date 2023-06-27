@@ -22,4 +22,4 @@ jobs:
           image: ronenlabagli/go-wallet
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          args: --buildvcs=false
+          args: --build-arg -buildvcs=false
