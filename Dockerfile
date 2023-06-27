@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:latest AS build
+FROM golang:1.19.0-alpine as build
 
 WORKDIR /app
 COPY . .
