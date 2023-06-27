@@ -1,7 +1,6 @@
 # Build stage
 FROM golang:latest AS build
 
-
 WORKDIR /app
 COPY . .
 EXPOSE 8002
