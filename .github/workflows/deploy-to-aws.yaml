@@ -29,7 +29,7 @@ jobs:
 
       - name: Pull Docker image
         run: |
-          sudo docker pull  --no-cache ronenlabagli/go-wallet:main
+          sudo docker pull ronenlabagli/go-wallet:main
 
       - name: Deploy application to EC2
         run: |
