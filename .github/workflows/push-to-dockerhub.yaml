@@ -19,6 +19,6 @@ jobs:
       - name: Kaniko build
         uses: aevea/action-kaniko@master
         with:
-          image: ronenlabagli/go-wallet-usage
+          image: ronenlabagli/go-wallet-usage:main
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
