@@ -36,6 +36,6 @@ jobs:
           echo "ENV_VARIABLE='${{ secrets.ENV_VARIABLE }}'" >> .env
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
           chmod 400 ssh_key.pem
-          ssh -o "StrictHostKeyChecking=no" -i ssh_key.pem ec2-user@ec2-3-84-95-162.compute-1.amazonaws.com "sudo docker run -d -p 8002:8002 --name go-wallet \
+          ssh -o "StrictHostKeyChecking=no" -i ssh_key.pem ec2-user@ec2-3-84-95-162.compute-1.amazonaws.com "sudo docker stop go-wallet || true && sudo docker rm go-wallet && sudo docker run -d -p 8002:8002 --name go-wallet \
             -v /home/ec2-user/go-bank/.env:/wallet/.env \
             ronenlabagli/go-wallet:main"
