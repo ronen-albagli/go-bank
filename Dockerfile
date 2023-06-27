@@ -1,13 +1,17 @@
-FROM golang:latest
+# Build stage
+FROM golang:latest AS build
+
 
 WORKDIR /app
-
 COPY . .
-
-RUN go build -o app .
-
-RUN chmod +x app
-
 EXPOSE 8002
 
-CMD ["./app"]
+RUN CGO_ENABLED=0 GOOS=linux go build -o bank .
+
+FROM alpine
+COPY --from=build /app/bank /
+COPY .env /
+
+
+
+CMD ["/bank"]

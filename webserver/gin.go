@@ -21,7 +21,8 @@ func CreateWebServer() *gin.Engine {
 	app := gin.Default()
 
 	router.CreateServerRoutes(app)
-	consumers.InvoiceConsumer()
+
+	go consumers.InvoiceConsumer()
 
 	return app
 }
