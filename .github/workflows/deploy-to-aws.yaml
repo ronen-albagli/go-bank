@@ -37,5 +37,5 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
           chmod 400 ssh_key.pem
           ssh -o "StrictHostKeyChecking=no" -i ssh_key.pem ec2-user@ec2-3-84-95-162.compute-1.amazonaws.com "sudo docker run -d -p 8002:8002 --name go-wallet \
-            -v /home/ec2-user/go-bank/.env:/wallet/.env \
+            -v /home/ec2-user/go-bank/.env:/app/.env \
             ronenlabagli/go-wallet:main"
