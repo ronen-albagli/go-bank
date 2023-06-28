@@ -19,10 +19,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build Go application
-        run: |
-          go build -buildvcs=false -o bank .
-
       - name: Kaniko build
         uses: aevea/action-kaniko@master
         with:
