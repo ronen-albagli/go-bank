@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Go application
         run: |
-          go build -o bank .
+          go build -buildvcs=false -o bank .
 
       - name: Kaniko build
         uses: aevea/action-kaniko@master
